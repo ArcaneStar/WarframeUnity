@@ -1,0 +1,9 @@
+﻿<Window x:Class="WarframeUnity.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MainWindow" Height="350" Width="525">
+    <Grid>
+        <TextBox x:Name="console" HorizontalAlignment="Left" Height="300" Margin="10,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="497" BorderThickness="4"/>
+
+    </Grid>
+</Window>

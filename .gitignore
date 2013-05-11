@@ -13,6 +13,7 @@ obj/
 *.swp
 *~.nib
 *.suo
+*.sln
 local.properties
 .classpath
 .settings/
