@@ -60,6 +60,12 @@
     <Compile Include="Alert.cs" />
     <Compile Include="Feed\Tweet.cs" />
     <Compile Include="Feed\Twitter.cs" />
+    <Compile Include="UI\AlertList.xaml.cs">
+      <DependentUpon>AlertList.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\MainNotificationWindow.xaml.cs">
+      <DependentUpon>MainNotificationWindow.xaml</DependentUpon>
+    </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -73,6 +79,14 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="UI\AlertList.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\MainNotificationWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

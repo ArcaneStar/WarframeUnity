@@ -39,6 +39,9 @@ namespace WarframeUnity
             alerts.OnAlert += OnAlert;
 
             Start();
+            //this.Visibility = System.Windows.Visibility.Hidden;
+            UI.MainNotificationWindow NotificationWindow = new UI.MainNotificationWindow();
+            NotificationWindow.Show();
         }
 
         private void OnAlert()
