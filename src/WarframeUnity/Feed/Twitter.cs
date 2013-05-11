@@ -11,10 +11,32 @@ using System.Windows;
 
 namespace WarframeUnity.Feed
 {
+    /// <summary>
+    /// Holds the information of a parsed tweet.
+    /// </summary>
+    public class Tweet
+    {
+        #region Fields
+        public DateTime Created;
+        public long Id;
+        public string Author;
+        public long AuthorId;
+        public string Text;
+        #endregion
+
+        #region Constructors
+        public Tweet() { }
+        #endregion
+    }
+
+    /// <summary>
+    /// Manages connection to twitter and fetching tweets.
+    /// </summary>
     public class Twitter
     {
         #region Fields
         private WebClient client;
+        private JavaScriptSerializer serializer;
         private string queryUrl = "http://search.twitter.com/search.json?q=WarframeAlerts&include_entities=false&result_type=recent";
 
         private DateTime lastQuery;
@@ -28,7 +50,7 @@ namespace WarframeUnity.Feed
         public long MaxId { get { return maxId; } }
 
         /// <summary>
-        /// Gets the timestamp of the latest query.
+        /// Gets the time of the latest query.
         /// </summary>
         public DateTime LastQuery { get { return lastQuery; } }
         #endregion
@@ -40,37 +62,49 @@ namespace WarframeUnity.Feed
         /// <param name="queryInterval">The time between each query attempt.</param>
         public Twitter()
         {
-            this.client = new WebClient();
-            this.lastQuery = DateTime.MinValue;
-            this.maxId = 0;
+            client = new WebClient();
+            serializer = new JavaScriptSerializer();
+            lastQuery = DateTime.MinValue;
+            maxId = FetchMaxId();
         }
         #endregion
 
         #region Methods
         /// <summary>
-        /// Queries the warframe alert feed on twitter and returns the results in a string.
+        /// Gets the id of the most recent tweet.
         /// </summary>
-        private string Query()
+        public long FetchMaxId()
         {
-            string result = client.DownloadString(HttpUtility.UrlPathEncode(queryUrl + (maxId != -1 ? String.Format("&since_id={0}", maxId) : "")));
-            if (!string.IsNullOrWhiteSpace(result))
-                return result;
-
-            return null;
+            long tempId = -1;
+            string data = client.DownloadString(queryUrl + "&rpp=1");
+            if (!string.IsNullOrWhiteSpace(data))
+            {
+                Dictionary<string, object> query = serializer.Deserialize<Dictionary<string, object>>(data);
+                long.TryParse(query["max_id"].ToString(), out tempId);
+            }
+            return tempId;
         }
 
-        public List<Tweet> FetchTweets()
+        /// <summary>
+        /// Checks for new tweets and returns them in a list if any are found.
+        /// </summary>
+        /// <param name="fetchAll">Specifies whether all tweets should be collected or just unread tweets.</param>
+        /// <param name="limit">Specifies the maximum amount of tweets that will be collected.</param>
+        public List<Tweet> FetchTweets(bool fetchAll, int limit = 15)
         {
-            string data = Query();
+            string url = String.Format("{0}&rpp={1}", queryUrl, limit); 
+            if (fetchAll && maxId != -1)
+                url += "&since_id=" + maxId.ToString();
+
+            string data = client.DownloadString(HttpUtility.UrlPathEncode(url));
             if (string.IsNullOrWhiteSpace(data))
                 return null;
 
             List<Tweet> fresh = new List<Tweet>();
-            JavaScriptSerializer serializer = new JavaScriptSerializer();
             Dictionary<string, object> parsed = serializer.Deserialize<Dictionary<string, object>>(data);
 
             long tempId;
-            if (long.TryParse(parsed["max_id"].ToString(), out tempId) && tempId > maxId)
+            if (parsed.ContainsKey("max_id") && long.TryParse(parsed["max_id"].ToString(), out tempId) && tempId > maxId)
                 maxId = tempId;
 
             if (parsed.ContainsKey("results"))
@@ -94,11 +128,8 @@ namespace WarframeUnity.Feed
                     }
                 }
             }
-
-            if (fresh.Count > 0)
-                return fresh;
-
-            return null;
+            lastQuery = DateTime.Now;
+            return fresh;
         }
         #endregion
     }
